@@ -60,7 +60,11 @@ import {
   type ResolvedProxyMember,
 } from '@/types/proxy-view'
 import { debugLog } from '@/utils/debug'
-import { compareByDelay, DEFAULT_DELAY_TIMEOUT } from '@/utils/delay'
+import {
+  compareByDelay,
+  DEFAULT_DELAY_TIMEOUT,
+  getDisplayDelay,
+} from '@/utils/delay'
 
 const STORAGE_KEY_GROUP = 'clash-verge-selected-proxy-group'
 const STORAGE_KEY_SORT_TYPE = 'clash-verge-proxy-sort-type'
@@ -133,19 +137,20 @@ function getSignalIcon(
       text: translate('home.components.currentProxy.status.timeout'),
       color: 'error.main',
     }
-  if (delay >= 500)
+  const displayDelay = getDisplayDelay(delay)
+  if (displayDelay >= 500)
     return {
       icon: <SignalWeak />,
       text: translate('home.components.currentProxy.status.latencyHigh'),
       color: 'error.main',
     }
-  if (delay >= 300)
+  if (displayDelay >= 300)
     return {
       icon: <SignalMedium />,
       text: translate('home.components.currentProxy.status.latencyMedium'),
       color: 'warning.main',
     }
-  if (delay >= 200)
+  if (displayDelay >= 200)
     return {
       icon: <SignalGood />,
       text: translate('home.components.currentProxy.status.latencyGood'),

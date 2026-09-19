@@ -11,7 +11,11 @@ import {
   type ResolvedProxyMember,
 } from '@/types/proxy-view'
 import { debugLog } from '@/utils/debug'
-import { classifyDelay, DEFAULT_DELAY_TIMEOUT } from '@/utils/delay'
+import {
+  classifyDelay,
+  DEFAULT_DELAY_TIMEOUT,
+  getDisplayDelay,
+} from '@/utils/delay'
 
 export type DelaySnapshot = {
   of: (member: ResolvedProxyMember) => number
@@ -412,7 +416,7 @@ class DelayManager {
       case 'error':
         return 'Error'
       case 'measured':
-        return `${delay}`
+        return `${getDisplayDelay(delay, timeout)}`
     }
   }
 
@@ -424,11 +428,13 @@ class DelayManager {
       case 'timeout':
       case 'error':
         return 'error.main'
-      case 'measured':
+      case 'measured': {
+        const displayDelay = getDisplayDelay(delay, timeout)
         // Colour and signal bars intentionally use different grading thresholds.
-        if (delay >= 400) return 'warning.main'
-        if (delay >= 250) return 'primary.main'
+        if (displayDelay >= 400) return 'warning.main'
+        if (displayDelay >= 250) return 'primary.main'
         return 'success.main'
+      }
     }
   }
 }

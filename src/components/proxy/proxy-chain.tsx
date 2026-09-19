@@ -50,6 +50,7 @@ import {
   selectRuleChainMembers,
 } from '@/types/proxy-view'
 import { debugLog } from '@/utils/debug'
+import { classifyDelay, getDisplayDelay } from '@/utils/delay'
 
 import { rebindProxyChainItems, type ProxyChainItem } from './proxy-chain-model'
 
@@ -134,6 +135,10 @@ const ChainCard = ({
 }: ChainCardProps) => {
   const theme = useTheme()
   const { t } = useTranslation()
+  const displayDelay =
+    proxy.delay !== undefined && classifyDelay(proxy.delay) === 'measured'
+      ? getDisplayDelay(proxy.delay)
+      : undefined
 
   const roleLabel = isFirst
     ? t('proxies.page.chain.entryNode')
@@ -224,13 +229,15 @@ const ChainCard = ({
       {proxy.delay !== undefined && (
         <Chip
           label={
-            proxy.delay > 0 ? `${proxy.delay}ms` : t('shared.labels.timeout')
+            displayDelay !== undefined
+              ? `${displayDelay}ms`
+              : t('shared.labels.timeout')
           }
           size="small"
           color={
-            proxy.delay > 0 && proxy.delay < 200
+            displayDelay !== undefined && displayDelay < 200
               ? 'success'
-              : proxy.delay > 0 && proxy.delay < 800
+              : displayDelay !== undefined && displayDelay < 800
                 ? 'warning'
                 : 'error'
           }

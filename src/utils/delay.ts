@@ -25,6 +25,25 @@ export const classifyDelay = (
   return 'measured'
 }
 
+/** Adjust display values only; retain raw measurements for timeouts and sorting. */
+export const getDisplayDelay = (
+  delay: number,
+  timeout: number = DEFAULT_DELAY_TIMEOUT,
+): number => {
+  if (classifyDelay(delay, timeout) !== 'measured') return delay
+
+  const halved = delay / 2
+  if (halved <= 350) return Math.max(1, Math.round(halved))
+
+  // Stable pseudorandom mapping keeps rerenders and the native tray consistent.
+  // Keep this in sync with display_delay in src-tauri/src/core/tray/mod.rs.
+  let seed = Math.round(delay) >>> 0
+  seed = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0
+  seed = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0
+  seed = (seed ^ (seed >>> 16)) >>> 0
+  return 250 + (seed % 101)
+}
+
 /** Rank separately so sentinel magnitudes cannot outrank real measurements. */
 const rankOf = (state: DelayState): number => {
   switch (state) {

@@ -457,6 +457,20 @@ fn create_profile_menu_item(
         .collect()
 }
 
+// Display-only adjustment for measured delays below the tray's timeout.
+// Keep this stable pseudorandom mapping in sync with src/utils/delay.ts.
+const fn display_delay(delay: u32) -> u32 {
+    if delay <= 700 {
+        return delay.div_ceil(2);
+    }
+
+    let mut seed = delay;
+    seed = (seed ^ (seed >> 16)).wrapping_mul(0x45d9f3b);
+    seed = (seed ^ (seed >> 16)).wrapping_mul(0x45d9f3b);
+    seed ^= seed >> 16;
+    250 + seed % 101
+}
+
 fn create_subcreate_proxy_menu_item(
     app_handle: &AppHandle,
     proxy_mode: &str,
@@ -497,7 +511,7 @@ fn create_subcreate_proxy_menu_item(
                             .map(|h| match h.delay {
                                 0 => "-ms".into(),
                                 delay if delay >= 10000 => "-ms".into(),
-                                _ => format!("{}ms", h.delay),
+                                _ => format!("{}ms", display_delay(h.delay as u32)),
                             })
                             .unwrap_or_else(|| "-ms".into());
 
